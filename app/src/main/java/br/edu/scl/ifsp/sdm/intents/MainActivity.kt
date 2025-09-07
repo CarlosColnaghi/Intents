@@ -3,6 +3,7 @@ package br.edu.scl.ifsp.sdm.intents
 import android.Manifest.permission.CALL_PHONE
 import android.content.Intent
 import android.content.Intent.ACTION_CALL
+import android.content.Intent.ACTION_DIAL
 import android.content.Intent.ACTION_VIEW
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -42,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 
         callPhonePermissionArl = registerForActivityResult(ActivityResultContracts.RequestPermission()) { permissionGranted ->
             if (permissionGranted) {
-                callPhone()
+                callPhone(true)
             } else {
                 Toast.makeText(this, getString(R.string.permission_required_to_call), Toast.LENGTH_SHORT).show()
             }
@@ -82,17 +83,18 @@ class MainActivity : AppCompatActivity() {
             R.id.callMi -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (checkSelfPermission(CALL_PHONE) == PERMISSION_GRANTED) {
-                        callPhone()
+                        callPhone(true)
                     } else {
                         callPhonePermissionArl.launch(CALL_PHONE)
                     }
                 } else {
-                    callPhone()
+                    callPhone(true)
                 }
                 true
             }
 
             R.id.dialMi -> {
+                callPhone(false)
                 true
             }
 
@@ -110,9 +112,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun callPhone(){
+    private fun callPhone(call: Boolean){
         startActivity(
-            Intent(ACTION_CALL).apply {
+            Intent(if (call) ACTION_CALL else ACTION_DIAL).apply {
                 "tel: ${activityMainBinding.parameterTv.text}".also {
                     data = Uri.parse(it)
                 }
